@@ -4,7 +4,7 @@ A simple and responsive weather forecast application built using **React** and t
 
 ## 📸 Demo
 
-![App Screenshot](https://drive.google.com/file/d/11TKg42kyJZV2x0z-m3eMPwl2UbpOk9_H/view?usp=sharing) 
+![App Screenshot](https://drive.google.com/uc?export=view&id=11TKg42kyJZV2x0z-m3eMPwl2UbpOk9_H)
 
 Try the live app here: [https://weather-broadcast.vercel.app](https://weather-broadcast-using-react.vercel.app/) 
 ---
