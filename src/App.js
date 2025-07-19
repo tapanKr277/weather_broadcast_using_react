@@ -4,56 +4,88 @@ import Output from './components/Output';
 import Spinner from './components/Spinner';
 
 function App() {
+  const [data, setData] = useState([]);
+  const [cityName, setCityName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
 
-  const [data, setData]=useState([])
-  const [cityName, setCityName]=useState('')
-  const [loading, setLoading]=useState(true)
+  const inputHandler = (e) => {
+    setCityName(e.target.value);
+    setErrorMsg(''); // clear error on input change
+  };
 
-  const inputHnadler=(e)=>{
-    let val=e.target.value;
-    setCityName(val);
-  }
-
-  const formHandler=(e)=>{
+  const formHandler = (e) => {
     e.preventDefault();
-    async function fetchData(){
-      try{
-        const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=35e18e5f5025dc2beda4c1d72b6873f1&units=metric`
-        let apiData = await fetch(url);
-        let fecthdata = await apiData.json() 
-        setData(fecthdata)
-        setLoading(false)
+    async function fetchData() {
+      try {
+        setLoading(true);
+        setErrorMsg('');
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apiKey}&units=metric`;
+        const apiData = await fetch(url);
+        const fetchedData = await apiData.json();
+
+        if (fetchedData.cod !== 200) {
+          setErrorMsg(fetchedData.message || 'Unable to fetch data');
+          setData([]);
+        } else {
+          setData(fetchedData);
+        }
+
+        setLoading(false);
+      } catch (error) {
+        setErrorMsg('Something went wrong. Please try again.');
+        setLoading(false);
+        setData([]);
       }
-      catch(error){
-        console.log("enter valid city name")
-      }
-    };
+    }
     fetchData();
-    
-  }
+  };
 
   return (
-    <div className="flex flex-wrap flex-col items-center justify-center justify-items-center h-[100vh] w-[100vw] bg-slate-800 text-white">
-      <h1 className='text-4xl font-bold'>weather Broadcast</h1>
-      <div className='bg-violet-400 mx-auto w-[200px] h-[4px] mt-2'>
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 to-slate-700 text-white flex flex-col items-center justify-start py-10 px-4">
+      <h1 className="text-5xl font-extrabold tracking-wide text-center mb-2 animate-fade-in">
+        Weather Broadcast
+      </h1>
+      <div className="bg-violet-500 h-1 w-32 rounded-full mb-10"></div>
 
-      </div>
-      <div className="md:w-[700px] gap-2 text-black bg-white flex flex-col justify-center items-center mt-10 p-10 transition-all duration-700 hover:shadow-xl rounded-md ">
-        <form onSubmit={formHandler}>
-            <div className='grid gap-4 grid-cols-3' >
-              <label className='tracking-wider mt-1 font-bold text-2sm capitalize'>
-                Enter City/State Name
-              </label>
-              <input onChange={inputHnadler}  className="tracking-wide" id="grid-first-name" type="text" placeholder="City/State Name" required ></input>
-              <button className="bg-violet-400 hover:bg-violet-500 transition-all duration-200 cursor-pointer px-10 py-2 rounded-md font-bold text-white text-lg">Submit</button>
-            </div>
+      <div className="bg-white text-black rounded-xl p-8 w-full max-w-2xl shadow-2xl transition-all duration-500 hover:shadow-violet-500/30 animate-fade-in-up">
+        <form onSubmit={formHandler} className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <label htmlFor="city-input" className="font-semibold tracking-wide text-sm sm:text-base">
+            Enter City/State Name:
+          </label>
+          <input
+            onChange={inputHandler}
+            id="city-input"
+            type="text"
+            placeholder="e.g. Jamshedpur"
+            required
+            className="flex-1 px-4 py-2 border border-violet-400 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-400"
+          />
+          <button
+            type="submit"
+            className="bg-violet-500 text-white font-bold px-6 py-2 rounded-md hover:bg-violet-600 transition duration-200"
+          >
+            Submit
+          </button>
         </form>
-        {
-          loading ? <Spinner>Enter City Name</Spinner> : <Output data={data} cityName={cityName}></Output>
-        }
-    </div>
-    
+
+        {errorMsg && (
+          <div className="mt-4 text-red-600 text-center animate-pulse transition-all duration-300">
+            ❌ {errorMsg}
+          </div>
+        )}
+
+        <div className="mt-8">
+          {loading ? (
+            <Spinner>Loading weather data...</Spinner>
+          ) : (
+            data.main && <Output data={data} cityName={cityName} />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
+
 export default App;
